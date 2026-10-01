@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>저메추 - 오늘 저녁 뭐 먹지?</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons & Google Fonts -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Pretendard:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FF5E36',
+                            coral: '#FF3B60',
+                            purple: '#7928CA',
+                            yellow: '#FFB800',
+                            dark: '#0F172A'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', 'Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    animation: {
+                        'gradient-x': 'gradient-x 8s ease infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'pop-in': 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                    },
+                    keyframes: {
+                        'gradient-x': {
+                            '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
+                        },
+                        'float': {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-12px) rotate(3deg)' }
+                        },
+                        'popIn': {
+                            '0%': { opacity: '0', transform: 'scale(0.9) translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Trendy Glassmorphism & Animated Backgrounds */
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0d0f18;
+            color: #f8fafc;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: radial-gradient(circle at 10% 20%, rgba(255, 94, 54, 0.35) 0%, transparent 40%),
+                        radial-gradient(circle at 85% 15%, rgba(121, 40, 202, 0.4) 0%, transparent 45%),
+                        radial-gradient(circle at 50% 80%, rgba(255, 59, 96, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 90% 85%, rgba(255, 184, 0, 0.25) 0%, transparent 40%),
+                        #0b0d14;
+            filter: blur(40px);
+            background-size: 150% 150%;
+            animation: gradient-x 12s ease infinite;
+        }
+
+        .glass-card {
+            background: rgba(22, 27, 46, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 94, 54, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 94, 54, 0.25);
+        }
+
+        .glass-button.active {
+            background: linear-gradient(135deg, #FF5E36 0%, #FF3B60 100%);
+            border-color: transparent;
+            box-shadow: 0 10px 25px rgba(255, 59, 96, 0.4);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #FF9F43 0%, #FF5E36 50%, #FF3B60 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen items-center justify-center p-4 sm:p-6">
+
+    <div class="mesh-bg"></div>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="w-full max-w-md glass-card rounded-3xl p-6 sm:p-8 my-auto relative overflow-hidden transition-all duration-300">
+        
+        <!-- HEADER -->
+        <header class="text-center mb-8 relative">
+            <div class="inline-flex items-center justify-center space-x-2 bg-white/10 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-amber-300 mb-3 backdrop-blur-md border border-white/10">
+                <i class="ph-bold ph-sparkle text-amber-400"></i>
+                <span>Smart Meal Recommender</span>
+            </div>
+            <h1 class="text-4xl font-black tracking-tight gradient-text mb-1 cursor-pointer" onclick="resetApp()">
+                저메추 <span class="text-2xl font-extrabold text-white">✨</span>
+            </h1>
+            <p class="text-slate-400 text-xs sm:text-sm font-medium">오늘 저녁 뭐 먹을지 딱 정해드립니다!</p>
+        </header>
+
+        <!-- STEP 1: Mode Selection -->
+        <section id="step-1" class="space-y-4 animate-pop-in">
+            <div class="text-center mb-6">
+                <h2 class="text-xl font-bold text-white mb-1">오늘 저녁, 어떻게 드시나요?</h2>
+                <p class="text-xs text-slate-400">취향에 따라 스마트하게 골라드려요</p>
+            </div>
+
+            <button onclick="selectType('delivery')" class="glass-button w-full p-5 rounded-2xl flex items-center justify-between group">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-400 text-2xl group-hover:scale-110 transition-transform">
+                        🛵
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-lg text-white group-hover:text-orange-400 transition-colors">시켜먹기 (배달)</h3>
+                        <p class="text-xs text-slate-400">편하고 빠르게 배달시킬 때</p>
+                    </div>
+                </div>
+                <i class="ph-bold ph-caret-right text-slate-500 group-hover:text-white transition-colors"></i>
+            </button>
+
+            <button onclick="selectType('cook')" class="glass-button w-full p-5 rounded-2xl flex items-center justify-between group">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-400 text-2xl group-hover:scale-110 transition-transform">
+                        🍳
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-lg text-white group-hover:text-rose-400 transition-colors">해먹기 (요리)</h3>
+                        <p class="text-xs text-slate-400">집에서 레시피 보고 직접 요리할 때</p>
+                    </div>
+                </div>
+                <i class="ph-bold ph-caret-right text-slate-500 group-hover:text-white transition-colors"></i>
+            </button>
+        </section>
+
+        <!-- STEP 2: Category Selection -->
+        <section id="step-2" class="hidden space-y-5 animate-pop-in">
+            <div class="text-center mb-4">
+                <span id="badge-mode-type" class="px-3 py-1 rounded-full text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">🛵 배달 주문</span>
+                <h2 class="text-xl font-bold text-white mt-2">원하는 카테고리를 고르세요</h2>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="selectCategory('korean')" class="cat-btn glass-button p-4 rounded-xl text-center space-y-1">
+                    <div class="text-2xl">🍲</div>
+                    <div class="font-bold text-sm text-slate-200">한식</div>
+                </button>
+                <button onclick="selectCategory('chinese')" class="cat-btn glass-button p-4 rounded-xl text-center space-y-1">
+                    <div class="text-2xl">🥟</div>
+                    <div class="font-bold text-sm text-slate-200">중식</div>
+                </button>
+                <button onclick="selectCategory('japanese')" class="cat-btn glass-button p-4 rounded-xl text-center space-y-1">
+                    <div class="text-2xl">🍣</div>
+                    <div class="font-bold text-sm text-slate-200">일식</div>
+                </button>
+                <button onclick="selectCategory('western')" class="cat-btn glass-button p-4 rounded-xl text-center space-y-1">
+                    <div class="text-2xl">🍕</div>
+                    <div class="font-bold text-sm text-slate-200">양식</div>
+                </button>
+                <button onclick="selectCategory('asian')" class="cat-btn glass-button p-4 rounded-xl text-center space-y-1">
+                    <div class="text-2xl">떡</div>
+                    <div class="font-bold text-sm text-slate-200">분식/아시안</div>
+                </button>
+                <button onclick="selectCategory('all')" class="cat-btn glass-button p-4 rounded-xl text-center space-y-1 border-amber-500/40 bg-amber-500/10">
+                    <div class="text-2xl">🎲</div>
+                    <div class="font-bold text-sm text-amber-300">상관없음 (랜덤)</div>
+                </button>
+            </div>
+
+            <button onclick="goToStep(1)" class="w-full text-xs text-slate-400 hover:text-white pt-2 transition-colors text-center block">
+                ← 이전 단계로
+            </button>
+        </section>
+
+        <!-- STEP 3-1: Delivery Budget Range -->
+        <section id="step-3-delivery" class="hidden space-y-6 animate-pop-in">
+            <div class="text-center">
+                <h2 class="text-xl font-bold text-white mb-1">1인당 예산을 설정해주세요</h2>
+                <p class="text-xs text-slate-400">맞춤형 메뉴를 필터링합니다</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <span class="text-sm font-semibold text-slate-300">선택 예산:</span>
+                    <span id="budget-value" class="text-xl font-black text-amber-400">15,000 원</span>
+                </div>
+
+                <input type="range" id="budget-slider" min="7000" max="35000" step="1000" value="15000" 
+                    class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                    oninput="updateBudgetValue(this.value)">
+
+                <div class="flex justify-between text-xs text-slate-500 font-medium">
+                    <span>7천원 (가성비)</span>
+                    <span>2만원 (푸짐함)</span>
+                    <span>3.5만원+ (플렉스)</span>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="getDeliveryRecommendation()" class="w-full py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-orange-500 to-rose-500 hover:from-orange-600 hover:to-rose-600 shadow-lg shadow-orange-500/30 transition-all flex items-center justify-center space-x-2 text-base">
+                    <i class="ph-bold ph-magic-wand text-xl"></i>
+                    <span>AI 추천 메뉴 뽑기!</span>
+                </button>
+            </div>
+
+            <button onclick="goToStep(2)" class="w-full text-xs text-slate-400 hover:text-white transition-colors text-center block">
+                ← 카테고리 재선택
+            </button>
+        </section>
+
+        <!-- STEP 3-2: Cooking Candidates List -->
+        <section id="step-3-cook" class="hidden space-y-4 animate-pop-in">
+            <div class="text-center mb-2">
+                <h2 class="text-xl font-bold text-white mb-1">오늘의 요리 후보들</h2>
+                <p class="text-xs text-slate-400">요리하고 싶은 메뉴를 하나 선택하세요!</p>
+            </div>
+
+            <div id="cook-candidates-container" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                <!-- Dynamically generated candidates -->
+            </div>
+
+            <div class="pt-2 flex gap-2">
+                <button onclick="rerollCookCandidates()" class="flex-1 py-3 rounded-xl font-bold text-xs bg-white/10 hover:bg-white/20 border border-white/15 text-amber-300 transition-all flex items-center justify-center space-x-1">
+                    <i class="ph-bold ph-arrows-clockwise text-base"></i>
+                    <span>후보 다시 불러오기</span>
+                </button>
+            </div>
+
+            <button onclick="goToStep(2)" class="w-full text-xs text-slate-400 hover:text-white transition-colors text-center block pt-1">
+                ← 카테고리 재선택
+            </button>
+        </section>
+
+        <!-- STEP 4-1: Delivery Recommendation Result -->
+        <section id="step-4-delivery" class="hidden space-y-5 animate-pop-in">
+            <div class="text-center">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30 mb-2">
+                    ✨ AI 맞춤 배달 메뉴 선정!
+                </span>
+                <h2 class="text-2xl font-black text-white" id="delivery-dish-name">돼지김치찌개</h2>
+            </div>
+
+            <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/15 aspect-video bg-slate-800">
+                <img id="delivery-dish-img" src="" alt="음식 이미지" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'">
+                <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-xl text-amber-300 font-extrabold text-sm border border-white/10" id="delivery-dish-price">
+                    약 12,000원
+                </div>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2">
+                <div class="flex items-center space-x-2 text-orange-400 font-bold text-xs uppercase tracking-wide">
+                    <i class="ph-bold ph-chat-teardrop-dots"></i>
+                    <span>AI의 추천 한줄평</span>
+                </div>
+                <p id="delivery-dish-desc" class="text-sm text-slate-200 leading-relaxed font-medium">
+                    칼칼하고 깊은 국물 맛이 일품! 밥 두 공기 뚝딱하게 만드는 한국인의 소울푸드입니다.
+                </p>
+            </div>
+
+            <!-- Dynamic Reroll Button -->
+            <div class="space-y-2 pt-1">
+                <button onclick="rerollDeliveryMenu()" class="w-full py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30 transition-all flex items-center justify-center space-x-2 text-base">
+                    <i class="ph-bold ph-dice-5 text-xl animate-spin-slow"></i>
+                    <span>🎲 마음에 안 들어요! 다른 메뉴 보기</span>
+                </button>
+
+                <button onclick="resetApp()" class="w-full py-3 rounded-2xl font-bold text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-xs">
+                    🔄 처음부터 다시 선택
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 4-2: Recipe & Cook Result -->
+        <section id="step-4-recipe" class="hidden space-y-5 animate-pop-in">
+            <div class="text-center">
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 mb-1">
+                    🍳 홈셰프 레시피
+                </span>
+                <h2 id="recipe-title" class="text-2xl font-black text-white">차돌된장찌개</h2>
+            </div>
+
+            <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-white/15 h-44 bg-slate-800">
+                <img id="recipe-img" src="" alt="음식 이미지" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-3">
+                    <div class="flex space-x-2 text-xs font-semibold">
+                        <span id="recipe-time" class="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-amber-300 border border-white/10">⏱️ 20분</span>
+                        <span id="recipe-diff" class="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-emerald-300 border border-white/10">🔥 난이도: 쉬움</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <i class="ph-bold ph-basket text-amber-400"></i> 필요 재료
+                    </h3>
+                    <div id="recipe-ingredients" class="flex flex-wrap gap-1.5">
+                        <!-- Dynamic Tags -->
+                    </div>
+                </div>
+
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/10 max-h-56 overflow-y-auto">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <i class="ph-bold ph-list-numbers text-orange-400"></i> 요리 순서
+                    </h3>
+                    <div id="recipe-steps" class="text-xs text-slate-200 leading-relaxed space-y-2 whitespace-pre-line">
+                        <!-- Step contents -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2 pt-1">
+                <button onclick="goToStep('step-3-cook')" class="w-full py-3.5 rounded-2xl font-bold text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 transition-all text-xs flex items-center justify-center space-x-1">
+                    <i class="ph-bold ph-arrow-left text-sm"></i>
+                    <span>다른 요리 후보 보기</span>
+                </button>
+                <button onclick="resetApp()" class="w-full py-3 rounded-2xl font-bold text-slate-300 bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-xs">
+                    🔄 처음부터 다시 선택
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-6 text-center text-xs text-slate-500 font-medium">
+        © 2026 저메추 AI. Tasty Meals Every Night.
+    </footer>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+        // App State Management
+        const state = {
+            mode: null,        // 'delivery' | 'cook'
+            category: 'all',   // 'korean', 'chinese', 'japanese', 'western', 'asian', 'all'
+            budget: 15000,
+            lastDeliveryDishIndex: -1,
+            lastCookCandidateIndexes: []
+        };
+
+        // Comprehensive Database with Food Photos from Unsplash
+        const database = {
+            delivery: [
+                // Korean
+                { category: 'korean', name: '돼지김치찌개 + 계란말이', price: 12000, desc: '얼큰 칼칼한 김치찌개와 촉촉한 계란말이의 환상 조합!', img: 'https://images.unsplash.com/photo-1583085117462-8e1003f56860?auto=format&fit=crop&w=800&q=80' },
+                { category: 'korean', name: '보쌈 정식 (무말랭이+쌈)', price: 19000, desc: '야들야들하게 삶아낸 수육과 매콤달콤 무말랭이 한 쌈!', img: 'https://images.unsplash.com/photo-1628191010210-a59de33e5941?auto=format&fit=crop&w=800&q=80' },
+                { category: 'korean', name: '치즈 닭갈비', price: 16000, desc: '매콤한 양념 닭갈비 위에 고소한 칠레산 모짜렐라 폭탄!', img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80' },
+                { category: 'korean', name: '순살 족발', price: 28000, desc: '쫀득한 콜라겐 가득! 쟁반국수와 함께 곁들이는 저녁 야식 우승자.', img: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80' },
+                { category: 'korean', name: '우삼겹 차돌된장찌개', price: 11000, desc: '구수한 시골 된장에 차돌박이 기름이 은은하게 녹아든 맛.', img: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80' },
+
+                // Chinese
+                { category: 'chinese', name: '간짜장 + 찹쌀탕수육 세트', price: 16000, desc: '갓 볶아낸 진한 춘장 소스와 겉바속촉 쫄깃한 탕수육!', img: 'https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=800&q=80' },
+                { category: 'chinese', name: '마라탕 + 꿔바로우', price: 18000, desc: '알싸하고 매콤한 마라 국물에 바삭 달콤한 꿔바로우의 천국 조합.', img: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80' },
+                { category: 'chinese', name: '해물 짬뽕밥', price: 10000, desc: '불향 가득한 칼칼한 해물 육수로 오늘 하루 스트레스 싹!', img: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80' },
+
+                // Japanese
+                { category: 'japanese', name: '생연어 덮밥 (사케동)', price: 15000, desc: '두툼하고 신선한 연어 위에 와사비 콕 찍어먹는 일식 히트작!', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80' },
+                { category: 'japanese', name: '돈카츠 정식 (경양식/일식)', price: 13000, desc: '두툼한 등심과 바삭한 튀김옷! 고소한 특제 소스와 양배추 샐러드.', img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80' },
+                { category: 'japanese', name: '모듬 초밥 (12pcs)', price: 21000, desc: '광어, 참치, 새우, 계란까지 신선함이 팡팡 터지는 고급진 저녁.', img: 'https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=800&q=80' },
+
+                // Western
+                { category: 'western', name: '베이컨 투움바 파스타', price: 15000, desc: '매콤하고 꾸덕한 크림 소스에 통통한 베이컨과 새우 듬뿍!', img: 'https://images.unsplash.com/photo-1621996346565-e3def6164286?auto=format&fit=crop&w=800&q=80' },
+                { category: 'western', name: '페퍼로니 치즈 피자', price: 22000, desc: '짭조름한 페퍼로니와 고소한 모짜렐라 치즈가 풍성한 클래식 피자.', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80' },
+                { category: 'western', name: '수제 치즈버거 세트', price: 13500, desc: '육즙 가득한 수제 패티와 감자튀김, 시원한 콜라 한 잔!', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80' },
+
+                // Asian/Street Food
+                { category: 'asian', name: '로제 떡볶이 + 모둠튀김', price: 14000, desc: '부드러운 크림과 매콤한 떡볶이의 단짠 조합, 차돌/소세지 추가 필수!', img: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80' },
+                { category: 'asian', name: '소고기 쌀국수 + 짜조', price: 12500, desc: '진하게 우려낸 양지 육수에 숙주 가득! 깔끔하고 부담 없는 저녁.', img: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=800&q=80' },
+                { category: 'asian', name: '팟타이 (태국식 볶음면)', price: 13000, desc: '달콤 짭조름한 소스에 아삭한 숙주와 통통한 새우가 어우러진 맛.', img: 'https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=800&q=80' }
+            ],
+
+            cook: [
+                // Korean Cooking
+                {
+                    category: 'korean',
+                    name: '차돌박이 된장찌개',
+                    time: '15분',
+                    difficulty: '쉬움',
+                    img: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=800&q=80',
+                    ingredients: ['차돌박이 100g', '된장 2T', '두부 반모', '애호박 1/3개', '양파 반개', '청양고추 1개'],
+                    steps: "1. 냄비에 차돌박이를 먼저 볶아 고깃기름을 냅니다.\n2. 쌀뜸물 400ml와 된장 2큰술을 뭉침 없이 풀어줍니다.\n3. 썰어둔 애호박, 양파를 넣고 보글보글 끓입니다.\n4. 두부와 청양고추를 넣고 3분간 더 자작하게 끓여 완성합니다."
+                },
+                {
+                    category: 'korean',
+                    name: '스팸 김치볶음밥',
+                    time: '10분',
+                    difficulty: '매우 쉬움',
+                    img: 'https://images.unsplash.com/photo-1583085117462-8e1003f56860?auto=format&fit=crop&w=800&q=80',
+                    ingredients: ['잘게 썬 김치 1컵', '스팸 반캔', '찬밥 1공기', '굴소스 0.5T', '참기름', '계란 1개'],
+                    steps: "1. 스팸을 깍둑썰기하여 팬에 노릇하게 먼저 볶아줍니다.\n2. 김치와 설탕 0.5T를 넣고 신맛을 잡으며 볶습니다.\n3. 찬밥과 굴소스를 넣고 잘 섞어가며 센 불에 볶아냅니다.\n4. 참기름을 두르고 계란 프라이를 올리면 완성!"
+                },
+                {
+                    category: 'korean',
+                    name: '매콤 고추장 제육볶음',
+                    time: '20분',
+                    difficulty: '보통',
+                    img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=800&q=80',
+                    ingredients: ['돼지 앞다리살 300g', '고추장 2T', '고춧가루 1T', '간장 1T', '올리고당 1.5T', '대파'],
+                    steps: "1. 분량의 고추장, 간장, 올리고당, 마늘로 양념장을 만듭니다.\n2. 돼지고기에 양념을 재워둡니다 (10분).\n3. 달군 팬에 양파와 재워둔 고기를 함께 넣어 센 불로 볶습니다.\n4. 대파를 넣고 마무리를 한 뒤 상추와 함께 드세요!"
+                },
+
+                // Japanese Cooking
+                {
+                    category: 'japanese',
+                    name: '초간단 오야코동 (닭고기 덮밥)',
+                    time: '15분',
+                    difficulty: '쉬움',
+                    img: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
+                    ingredients: ['닭정육/안심 150g', '계란 2개', '양파 반개', '간장 2T', '맛술 2T', '설탕 1T', '물 6T'],
+                    steps: "1. 팬에 간장, 맛술, 설탕, 물을 넣고 채썬 양파를 끓입니다.\n2. 한입 크기로 썬 닭고기를 넣고 익힙니다.\n3. 계란을 살짝만 풀어 둘러 친 뒤 뚜껑을 덮고 반숙으로 익힙니다.\n4. 밥 위에 국물과 함께 얹어 냅니다."
+                },
+                {
+                    category: 'japanese',
+                    name: '명란 크림 우동',
+                    time: '12분',
+                    difficulty: '쉬움',
+                    img: 'https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=800&q=80',
+                    ingredients: ['우동면 1개', '명란젓 1개', '생크림/우유 150ml', '마늘 3알', '버터 1T'],
+                    steps: "1. 우동면은 끓는 물에 2분간 삶아 건져둡니다.\n2. 버터를 두른 팬에 편마늘을 볶다가 우유/생크림을 붓습니다.\n3. 껍질을 벗긴 명란과 우동면을 넣고 자작하게 졸입니다.\n4. 쪽파나 김가루를 얹어 고소하게 완성합니다."
+                },
+
+                // Western Cooking
+                {
+                    category: 'western',
+                    name: '풍미 가득 알리오 올리오',
+                    time: '15분',
+                    difficulty: '보통',
+                    img: 'https://images.unsplash.com/photo-1621996346565-e3def6164286?auto=format&fit=crop&w=800&q=80',
+                    ingredients: ['파스타면 100g', '통마늘 7알', '페페론치노 3개', '올리브유 5T', '소금'],
+                    steps: "1. 끓는 물에 소금 1T를 넣고 면을 8분간 삶아줍니다.\n2. 팬에 올리브유를 넉넉히 두르고 편마늘과 페페론치노를 약불에 노릇하게 볶습니다.\n3. 삶아진 면과 면수 1국자를 넣고 강불에서 유화시켜 만듭니다.\n4. 후추를 살짝 쳐서 접시에 담아냅니다."
+                },
+                {
+                    category: 'western',
+                    name: '치즈 에그 토마토 리조또',
+                    time: '18분',
+                    difficulty: '쉬움',
+                    img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80',
+                    ingredients: ['밥 1공기', '토마토 소스 4T', '다진 양파', '슬라이스 치즈 1장', '계란 1개'],
+                    steps: "1. 양파와 햄/베이컨을 기름에 볶습니다.\n2. 토마토 소스와 물 반컵, 밥을 넣고 잘 저어줍니다.\n3. 소스가 자작해지면 가운데 계란 하나를 깨뜨리고 치즈를 얹습니다.\n4. 뚜껑을 덮어 치즈가 녹으면 완성!"
+                },
+
+                // Asian Cooking
+                {
+                    category: 'asian',
+                    name: '백종원표 국물 떡볶이',
+                    time: '15분',
+                    difficulty: '매우 쉬움',
+                    img: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
+                    ingredients: ['떡볶이 떡 2컵', '어묵 2장', '고추장 1T', '고춧가루 2T', '설탕 2.5T', '간장 1T'],
+                    steps: "1. 냄비에 물 2컵과 설탕 2.5T를 넣고 먼저 끓입니다.\n2. 고추장, 고춧가루, 간장을 넣고 국물을 잡습니다.\n3. 불린 떡과 어묵, 대파를 넣고 국물이 자작해질 때까지 조려줍니다."
+                }
+            ]
+        };
+
+
+        function goToStep(stepId) {
+            // Hide all steps
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+
+            // Format step ID
+            const targetId = typeof stepId === 'number' ? `step-${stepId}` : stepId;
+            const targetEl = document.getElementById(targetId);
+            
+            if (targetEl) {
+                targetEl.classList.remove('hidden');
+            }
+        }
+
+        function selectType(type) {
+            state.mode = type;
+            const badge = document.getElementById('badge-mode-type');
+            if (type === 'delivery') {
+                badge.innerText = '🛵 시켜먹기 (배달)';
+                badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30';
+            } else {
+                badge.innerText = '🍳 직접 해먹기 (요리)';
+                badge.className = 'px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30';
+            }
+            goToStep(2);
+        }
+
+        function selectCategory(category) {
+            state.category = category;
+
+            // Highlight category UI
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (state.mode === 'delivery') {
+                goToStep('step-3-delivery');
+            } else {
+                renderCookCandidates();
+                goToStep('step-3-cook');
+            }
+        }
+
+        function updateBudgetValue(val) {
+            state.budget = parseInt(val);
+            document.getElementById('budget-value').innerText = `${parseInt(val).toLocaleString()} 원`;
+        }
+
+
+        // Get Random Delivery Menu guaranteeing NO IMMEDIATE REPEAT
+        function getDeliveryRecommendation() {
+            let pool = database.delivery;
+
+            // Category filter
+            if (state.category !== 'all') {
+                pool = pool.filter(item => item.category === state.category);
+            }
+
+            // Budget filter (allow slight buffer +2000)
+            let filteredPool = pool.filter(item => item.price <= state.budget + 2000);
+            if (filteredPool.length === 0) filteredPool = pool; // Fallback if tight budget
+
+            // Ensure non-repeating random pick
+            let randomIndex;
+            if (filteredPool.length > 1) {
+                do {
+                    randomIndex = Math.floor(Math.random() * filteredPool.length);
+                } while (randomIndex === state.lastDeliveryDishIndex);
+            } else {
+                randomIndex = 0;
+            }
+
+            state.lastDeliveryDishIndex = randomIndex;
+            const selectedDish = filteredPool[randomIndex];
+
+            // Render to DOM
+            document.getElementById('delivery-dish-name').innerText = selectedDish.name;
+            document.getElementById('delivery-dish-price').innerText = `약 ${selectedDish.price.toLocaleString()}원`;
+            document.getElementById('delivery-dish-desc').innerText = selectedDish.desc;
+            document.getElementById('delivery-dish-img').src = selectedDish.img;
+
+            goToStep('step-4-delivery');
+        }
+
+        function rerollDeliveryMenu() {
+            // Animate button feedback
+            getDeliveryRecommendation();
+        }
+
+
+        function renderCookCandidates() {
+            let pool = database.cook;
+
+            if (state.category !== 'all') {
+                pool = pool.filter(item => item.category === state.category);
+            }
+
+            if (pool.length === 0) pool = database.cook; // Fallback
+
+            // Shuffle pool
+            const shuffled = [...pool].sort(() => 0.5 - Math.random());
+            const candidates = shuffled.slice(0, 3); // Pick top 3 random
+
+            const container = document.getElementById('cook-candidates-container');
+            container.innerHTML = '';
+
+            candidates.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'glass-button p-4 rounded-2xl cursor-pointer hover:border-amber-400/50 transition-all flex items-center space-x-3 group';
+                card.onclick = () => showRecipeDetail(item);
+
+                const tagsHtml = item.ingredients.slice(0, 3).map(ing => 
+                    `<span class="bg-white/10 text-amber-200 px-2 py-0.5 rounded text-[10px] font-medium">${ing}</span>`
+                ).join(' ');
+
+                card.innerHTML = `
+                    <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0 group-hover:scale-105 transition-transform" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="font-bold text-sm text-white truncate group-hover:text-amber-300 transition-colors">${item.name}</h4>
+                            <span class="text-[10px] text-slate-400">${item.time}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1 mb-1">
+                            ${tagsHtml}
+                        </div>
+                        <span class="text-[10px] text-amber-400 font-semibold">👉 레시피 보기</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function rerollCookCandidates() {
+            renderCookCandidates();
+        }
+
+        function showRecipeDetail(item) {
+            document.getElementById('recipe-title').innerText = item.name;
+            document.getElementById('recipe-img').src = item.img;
+            document.getElementById('recipe-time').innerText = `⏱️ ${item.time}`;
+            document.getElementById('recipe-diff').innerText = `🔥 난이도: ${item.difficulty}`;
+
+            // Render Ingredients
+            const ingContainer = document.getElementById('recipe-ingredients');
+            ingContainer.innerHTML = item.ingredients.map(ing => 
+                `<span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-lg text-xs font-semibold">${ing}</span>`
+            ).join('');
+
+            // Render Steps
+            document.getElementById('recipe-steps').innerText = item.steps;
+
+            goToStep('step-4-recipe');
+        }
+
+        function resetApp() {
+            state.mode = null;
+            state.category = 'all';
+            state.budget = 15000;
+            state.lastDeliveryDishIndex = -1;
+            document.getElementById('budget-slider').value = 15000;
+            updateBudgetValue(15000);
+            goToStep(1);
+        }
+
+        // Initialize App
+        window.onload = function() {
+            goToStep(1);
+        };
+    </script>
+</body>
+</html>
